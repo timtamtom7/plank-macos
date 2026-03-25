@@ -165,3 +165,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
 }
+
+// MARK: - PlankState
+
+@MainActor
+final class PlankState {
+    static let shared = PlankState()
+
+    var bookmarks: [Bookmark] = []
+
+    private init() {}
+
+    func openBookmark(_ bookmark: Bookmark) {
+        if let urlString = bookmark.url, let url = URL(string: urlString) {
+            NSWorkspace.shared.open(url)
+        } else if let path = bookmark.path {
+            NSWorkspace.shared.open(URL(fileURLWithPath: path))
+        }
+    }
+}
+
