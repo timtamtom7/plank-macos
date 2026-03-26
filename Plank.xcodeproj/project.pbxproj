@@ -12,28 +12,42 @@
 		1D447638101B5986983CFAE5 /* iCloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0948D5E40847014B572FFBB /* iCloudSyncManager.swift */; };
 		554D81A000542FE33D963BA4 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 57AB5EFBE359C1ED74A92171 /* SQLite */; };
 		644499C206A4FE2B041485EB /* ImportExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E039FE54EB6E91EC28C49AA /* ImportExportService.swift */; };
+		6A60D883E50DC4D1655E8C95 /* WidgetIntelligenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECFE0494718085D9EDBC3E26 /* WidgetIntelligenceEngine.swift */; };
+		7E2EEAD5551D6B7794F728BD /* CleaningReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C431C46ACED29593328A19E /* CleaningReport.swift */; };
 		8CF665813F128EB554C7DC58 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1C3391E9B19E6006EDA340 /* Theme.swift */; };
+		8FC0ABF3128E15E8E4F19958 /* PlankModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B93CC6DEB5F6FB70716054 /* PlankModels.swift */; };
 		AD283ED20DD9A46C269F1A45 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FCA75EE8EF5C1B0F86E00F /* Services.swift */; };
 		AF25F94AB5072A70374B0384 /* ShortcutsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0F7E8D4C7471F0611E36AF7 /* ShortcutsManager.swift */; };
+		B0376ABE771E53F48ADDD286 /* CleaningTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287A64592BDD73CDFCAC34B0 /* CleaningTask.swift */; };
+		B8E7550B17B9B8C197F633CA /* PlankExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688C1BE7F20F885CF5303D67 /* PlankExport.swift */; };
+		C300A716365C3EDC6F0140D9 /* AccessibilityExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78C3E21448868543545C323D /* AccessibilityExtensions.swift */; };
 		DB751B468309014A29387DF0 /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54542EF160B969A699A0C188 /* SidebarViewController.swift */; };
 		E161E82FAC96485E5997D768 /* BookmarkRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E423D0030425FDCF7900F3 /* BookmarkRow.swift */; };
+		EF3444B25C0C6FDCD59D4E08 /* StartupCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE59A9DDA659EDD15A20424D /* StartupCleaner.swift */; };
 		F4AE9427E924A4789458089F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0FAF0EDEA61DB571C13FA3A /* AppDelegate.swift */; };
-		AABB00112233445566778800 /* WidgetIntelligenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00112233445566EEFF00 /* WidgetIntelligenceEngine.swift */; };
+		FA628A9E4646E7414DA73E5C /* ScheduleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D8BEBEBD54BAA874C29A71 /* ScheduleManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0C431C46ACED29593328A19E /* CleaningReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningReport.swift; sourceTree = "<group>"; };
 		13E423D0030425FDCF7900F3 /* BookmarkRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkRow.swift; sourceTree = "<group>"; };
 		13FCA75EE8EF5C1B0F86E00F /* Services.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
+		25B93CC6DEB5F6FB70716054 /* PlankModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlankModels.swift; sourceTree = "<group>"; };
+		287A64592BDD73CDFCAC34B0 /* CleaningTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningTask.swift; sourceTree = "<group>"; };
 		2F1C3391E9B19E6006EDA340 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		44676E8E7DFAAE2768C94857 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		54542EF160B969A699A0C188 /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
 		5E039FE54EB6E91EC28C49AA /* ImportExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExportService.swift; sourceTree = "<group>"; };
+		63D8BEBEBD54BAA874C29A71 /* ScheduleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleManager.swift; sourceTree = "<group>"; };
+		688C1BE7F20F885CF5303D67 /* PlankExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlankExport.swift; sourceTree = "<group>"; };
+		78C3E21448868543545C323D /* AccessibilityExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityExtensions.swift; sourceTree = "<group>"; };
 		A8F76D0BE2042CD326C39D44 /* BookmarkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkStore.swift; sourceTree = "<group>"; };
 		AE51CFD68DCF082410A1429B /* Plank.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Plank.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE59A9DDA659EDD15A20424D /* StartupCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupCleaner.swift; sourceTree = "<group>"; };
 		D0948D5E40847014B572FFBB /* iCloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncManager.swift; sourceTree = "<group>"; };
 		D0F7E8D4C7471F0611E36AF7 /* ShortcutsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsManager.swift; sourceTree = "<group>"; };
+		ECFE0494718085D9EDBC3E26 /* WidgetIntelligenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIntelligenceEngine.swift; sourceTree = "<group>"; };
 		F0FAF0EDEA61DB571C13FA3A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		AABB00112233445566EEFF00 /* WidgetIntelligenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIntelligenceEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,17 +75,32 @@
 		5B5DF92E92212B128D99CDA4 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				78C3E21448868543545C323D /* AccessibilityExtensions.swift */,
 				F0FAF0EDEA61DB571C13FA3A /* AppDelegate.swift */,
 				13E423D0030425FDCF7900F3 /* BookmarkRow.swift */,
 				A8F76D0BE2042CD326C39D44 /* BookmarkStore.swift */,
+				0C431C46ACED29593328A19E /* CleaningReport.swift */,
+				287A64592BDD73CDFCAC34B0 /* CleaningTask.swift */,
 				44676E8E7DFAAE2768C94857 /* main.swift */,
+				688C1BE7F20F885CF5303D67 /* PlankExport.swift */,
+				63D8BEBEBD54BAA874C29A71 /* ScheduleManager.swift */,
 				13FCA75EE8EF5C1B0F86E00F /* Services.swift */,
 				54542EF160B969A699A0C188 /* SidebarViewController.swift */,
+				BE59A9DDA659EDD15A20424D /* StartupCleaner.swift */,
 				2F1C3391E9B19E6006EDA340 /* Theme.swift */,
-				AABB00112233445566EEFF00 /* WidgetIntelligenceEngine.swift */,
+				ECFE0494718085D9EDBC3E26 /* WidgetIntelligenceEngine.swift */,
+				90B6B1148A79F604256BB7DB /* Models */,
 				2197E60B573491AFC4C0CED4 /* Services */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		90B6B1148A79F604256BB7DB /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				25B93CC6DEB5F6FB70716054 /* PlankModels.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		AFB8E632E7C5B07BCD0B8B05 /* Products */ = {
@@ -151,17 +180,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C300A716365C3EDC6F0140D9 /* AccessibilityExtensions.swift in Sources */,
 				F4AE9427E924A4789458089F /* AppDelegate.swift in Sources */,
 				E161E82FAC96485E5997D768 /* BookmarkRow.swift in Sources */,
 				07DB555FC224C66E9B0175DE /* BookmarkStore.swift in Sources */,
+				7E2EEAD5551D6B7794F728BD /* CleaningReport.swift in Sources */,
+				B0376ABE771E53F48ADDD286 /* CleaningTask.swift in Sources */,
 				644499C206A4FE2B041485EB /* ImportExportService.swift in Sources */,
+				B8E7550B17B9B8C197F633CA /* PlankExport.swift in Sources */,
+				8FC0ABF3128E15E8E4F19958 /* PlankModels.swift in Sources */,
+				FA628A9E4646E7414DA73E5C /* ScheduleManager.swift in Sources */,
 				AD283ED20DD9A46C269F1A45 /* Services.swift in Sources */,
 				AF25F94AB5072A70374B0384 /* ShortcutsManager.swift in Sources */,
 				DB751B468309014A29387DF0 /* SidebarViewController.swift in Sources */,
+				EF3444B25C0C6FDCD59D4E08 /* StartupCleaner.swift in Sources */,
 				8CF665813F128EB554C7DC58 /* Theme.swift in Sources */,
+				6A60D883E50DC4D1655E8C95 /* WidgetIntelligenceEngine.swift in Sources */,
 				1D447638101B5986983CFAE5 /* iCloudSyncManager.swift in Sources */,
 				177DF25D856CA8FD2F6E3BBD /* main.swift in Sources */,
-				AABB00112233445566778800 /* WidgetIntelligenceEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
