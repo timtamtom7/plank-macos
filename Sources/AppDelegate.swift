@@ -10,6 +10,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         BookmarkStore.shared.initialize()
+        PlankState.shared.bookmarks = BookmarkStore.shared.getAll()
         setupStatusItem()
         setupSidebarPanel()
         setupPopover()

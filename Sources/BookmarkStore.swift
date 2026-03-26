@@ -159,11 +159,11 @@ class BookmarkStore {
     }
 
     func reorder(_ reordered: [Bookmark]) {
+        guard let db = db else { return }
         for (index, var bookmark) in reordered.enumerated() {
             bookmark.position = index
             if let bid = bookmark.id {
                 do {
-                    guard let db = db else { return }
                     let row = bookmarks.filter(id == bid)
                     try db.run(row.update(position <- index))
                 } catch {
