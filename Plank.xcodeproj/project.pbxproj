@@ -18,6 +18,7 @@
 		DB751B468309014A29387DF0 /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54542EF160B969A699A0C188 /* SidebarViewController.swift */; };
 		E161E82FAC96485E5997D768 /* BookmarkRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E423D0030425FDCF7900F3 /* BookmarkRow.swift */; };
 		F4AE9427E924A4789458089F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0FAF0EDEA61DB571C13FA3A /* AppDelegate.swift */; };
+		AABB00112233445566778800 /* WidgetIntelligenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00112233445566EEFF00 /* WidgetIntelligenceEngine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		D0948D5E40847014B572FFBB /* iCloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncManager.swift; sourceTree = "<group>"; };
 		D0F7E8D4C7471F0611E36AF7 /* ShortcutsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsManager.swift; sourceTree = "<group>"; };
 		F0FAF0EDEA61DB571C13FA3A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		AABB00112233445566EEFF00 /* WidgetIntelligenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIntelligenceEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				13FCA75EE8EF5C1B0F86E00F /* Services.swift */,
 				54542EF160B969A699A0C188 /* SidebarViewController.swift */,
 				2F1C3391E9B19E6006EDA340 /* Theme.swift */,
+				AABB00112233445566EEFF00 /* WidgetIntelligenceEngine.swift */,
 				2197E60B573491AFC4C0CED4 /* Services */,
 			);
 			path = Sources;
@@ -158,6 +161,7 @@
 				8CF665813F128EB554C7DC58 /* Theme.swift in Sources */,
 				1D447638101B5986983CFAE5 /* iCloudSyncManager.swift in Sources */,
 				177DF25D856CA8FD2F6E3BBD /* main.swift in Sources */,
+				AABB00112233445566778800 /* WidgetIntelligenceEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
