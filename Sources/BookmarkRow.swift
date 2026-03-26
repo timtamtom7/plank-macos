@@ -12,6 +12,7 @@ class BookmarkRowView: NSView {
     private var iconView: NSImageView!
     private var nameLabel: NSTextField!
     private var subtitleLabel: NSTextField!
+    private var statusIconView: NSImageView!
     private var editButton: NSButton!
     private var deleteButton: NSButton!
     private var dragHandle: NSImageView!
@@ -70,6 +71,18 @@ class BookmarkRowView: NSView {
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(subtitleLabel)
 
+        // Link status indicator (only for weblinks with a known status)
+        statusIconView = NSImageView()
+        statusIconView.translatesAutoresizingMaskIntoConstraints = false
+        statusIconView.imageScaling = .scaleProportionallyUpOrDown
+        statusIconView.isHidden = bookmark.type != .weblink || bookmark.linkStatus == .unknown
+        if let statusImg = linkStatusImage() {
+            statusIconView.image = statusImg
+            statusIconView.contentTintColor = linkStatusColor()
+            statusIconView.toolTip = bookmark.linkStatus.displayName
+        }
+        addSubview(statusIconView)
+
         // Edit button
         editButton = NSButton(image: NSImage(systemSymbolName: "pencil", accessibilityDescription: "Edit")!, target: self, action: #selector(editTapped))
         editButton.bezelStyle = .accessoryBarAction
@@ -109,12 +122,18 @@ class BookmarkRowView: NSView {
             // Name
             nameLabel.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 10),
             nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: dragHandle.leadingAnchor, constant: -8),
+            nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: statusIconView.leadingAnchor, constant: -4),
 
             // Subtitle
             subtitleLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             subtitleLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 1),
             subtitleLabel.trailingAnchor.constraint(lessThanOrEqualTo: dragHandle.leadingAnchor, constant: -8),
+
+            // Status icon (appears to the left of subtitle end)
+            statusIconView.trailingAnchor.constraint(equalTo: dragHandle.leadingAnchor, constant: -4),
+            statusIconView.centerYAnchor.constraint(equalTo: subtitleLabel.centerYAnchor),
+            statusIconView.widthAnchor.constraint(equalToConstant: 12),
+            statusIconView.heightAnchor.constraint(equalToConstant: 12),
 
             // Edit button
             editButton.trailingAnchor.constraint(equalTo: deleteButton.leadingAnchor, constant: -4),
@@ -149,6 +168,34 @@ class BookmarkRowView: NSView {
         case .weblink: return bookmark.url ?? ""
         case .folder: return bookmark.path ?? "No path"
         case .app: return bookmark.path?.components(separatedBy: "/").last ?? "No path"
+        }
+    }
+
+    private func linkStatusImage() -> NSImage? {
+        switch bookmark.linkStatus {
+        case .valid:
+            return NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: "Link OK")
+        case .broken:
+            return NSImage(systemSymbolName: "xmark.circle.fill", accessibilityDescription: "Broken link")
+        case .redirected:
+            return NSImage(systemSymbolName: "arrow.uturn.right.circle.fill", accessibilityDescription: "Redirected")
+        case .timeout:
+            return NSImage(systemSymbolName: "clock.badge.exclamationmark", accessibilityDescription: "Timeout")
+        case .checking:
+            return NSImage(systemSymbolName: "arrow.triangle.2.circlepath", accessibilityDescription: "Checking")
+        case .unknown:
+            return nil
+        }
+    }
+
+    private func linkStatusColor() -> NSColor {
+        switch bookmark.linkStatus {
+        case .valid: return NSColor(red: 0.06, green: 0.73, blue: 0.51, alpha: 1.0) // #10B981 Success
+        case .broken: return NSColor(red: 0.94, green: 0.27, blue: 0.27, alpha: 1.0) // #EF4444 Destructive
+        case .redirected: return NSColor(red: 0.96, green: 0.62, blue: 0.04, alpha: 1.0) // #F59E0B Warning
+        case .timeout: return NSColor(red: 0.96, green: 0.62, blue: 0.04, alpha: 1.0) // #F59E0B Warning
+        case .checking: return .secondaryLabelColor
+        case .unknown: return .clear
         }
     }
 

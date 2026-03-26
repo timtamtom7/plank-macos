@@ -11,10 +11,12 @@
 		177DF25D856CA8FD2F6E3BBD /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44676E8E7DFAAE2768C94857 /* main.swift */; };
 		1A9B5258EB5E19961ED4F66A /* PrivacyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD737F4C77AFACA6EB9165F3 /* PrivacyService.swift */; };
 		1D447638101B5986983CFAE5 /* iCloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0948D5E40847014B572FFBB /* iCloudSyncManager.swift */; };
+		38C2552B863CD9F360CC8BC5 /* LinkCheckerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4253929E6A124F2C6085E29 /* LinkCheckerService.swift */; };
 		554D81A000542FE33D963BA4 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 57AB5EFBE359C1ED74A92171 /* SQLite */; };
 		644499C206A4FE2B041485EB /* ImportExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E039FE54EB6E91EC28C49AA /* ImportExportService.swift */; };
 		6A60D883E50DC4D1655E8C95 /* WidgetIntelligenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECFE0494718085D9EDBC3E26 /* WidgetIntelligenceEngine.swift */; };
 		7E2EEAD5551D6B7794F728BD /* CleaningReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C431C46ACED29593328A19E /* CleaningReport.swift */; };
+		80C4E954BF844D8D9B0D0934 /* HTMLBookmarkExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E3B1137483982AE490586D /* HTMLBookmarkExporter.swift */; };
 		8CF665813F128EB554C7DC58 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1C3391E9B19E6006EDA340 /* Theme.swift */; };
 		8FC0ABF3128E15E8E4F19958 /* PlankModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B93CC6DEB5F6FB70716054 /* PlankModels.swift */; };
 		AD283ED20DD9A46C269F1A45 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FCA75EE8EF5C1B0F86E00F /* Services.swift */; };
@@ -32,6 +34,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		01E3B1137483982AE490586D /* HTMLBookmarkExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLBookmarkExporter.swift; sourceTree = "<group>"; };
 		0C431C46ACED29593328A19E /* CleaningReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningReport.swift; sourceTree = "<group>"; };
 		13E423D0030425FDCF7900F3 /* BookmarkRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkRow.swift; sourceTree = "<group>"; };
 		13FCA75EE8EF5C1B0F86E00F /* Services.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
@@ -49,6 +52,7 @@
 		AD737F4C77AFACA6EB9165F3 /* PrivacyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyService.swift; sourceTree = "<group>"; };
 		AE51CFD68DCF082410A1429B /* Plank.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Plank.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE59A9DDA659EDD15A20424D /* StartupCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupCleaner.swift; sourceTree = "<group>"; };
+		C4253929E6A124F2C6085E29 /* LinkCheckerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkCheckerService.swift; sourceTree = "<group>"; };
 		D0948D5E40847014B572FFBB /* iCloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncManager.swift; sourceTree = "<group>"; };
 		D0F7E8D4C7471F0611E36AF7 /* ShortcutsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsManager.swift; sourceTree = "<group>"; };
 		ECFE0494718085D9EDBC3E26 /* WidgetIntelligenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIntelligenceEngine.swift; sourceTree = "<group>"; };
@@ -71,8 +75,10 @@
 		2197E60B573491AFC4C0CED4 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				01E3B1137483982AE490586D /* HTMLBookmarkExporter.swift */,
 				D0948D5E40847014B572FFBB /* iCloudSyncManager.swift */,
 				5E039FE54EB6E91EC28C49AA /* ImportExportService.swift */,
+				C4253929E6A124F2C6085E29 /* LinkCheckerService.swift */,
 				AD737F4C77AFACA6EB9165F3 /* PrivacyService.swift */,
 				D0F7E8D4C7471F0611E36AF7 /* ShortcutsManager.swift */,
 				EF92A6CE9E843378490B9E6B /* SubscriptionManager.swift */,
@@ -195,7 +201,9 @@
 				07DB555FC224C66E9B0175DE /* BookmarkStore.swift in Sources */,
 				7E2EEAD5551D6B7794F728BD /* CleaningReport.swift in Sources */,
 				B0376ABE771E53F48ADDD286 /* CleaningTask.swift in Sources */,
+				80C4E954BF844D8D9B0D0934 /* HTMLBookmarkExporter.swift in Sources */,
 				644499C206A4FE2B041485EB /* ImportExportService.swift in Sources */,
+				38C2552B863CD9F360CC8BC5 /* LinkCheckerService.swift in Sources */,
 				B8E7550B17B9B8C197F633CA /* PlankExport.swift in Sources */,
 				8FC0ABF3128E15E8E4F19958 /* PlankModels.swift in Sources */,
 				1A9B5258EB5E19961ED4F66A /* PrivacyService.swift in Sources */,

@@ -1,5 +1,6 @@
 import AppKit
 import SQLite
+import os.log
 
 class SidebarViewController: NSViewController {
 
@@ -7,10 +8,14 @@ class SidebarViewController: NSViewController {
     private var tableView: NSTableView!
     private var addButton: NSButton!
     private var editButton: NSButton!
+    private var checkLinksButton: NSButton!
     private var isEditMode = false
+    private var isCheckingLinks = false
 
     private var pinnedApps: [Bookmark] = []
     private var bookmarks: [Bookmark] = []
+
+    private let logger = Logger(subsystem: "com.plank.app", category: "Sidebar")
 
     var onClose: (() -> Void)?
 
@@ -96,6 +101,12 @@ class SidebarViewController: NSViewController {
         editButton.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(editButton)
 
+        checkLinksButton = NSButton(image: NSImage(systemSymbolName: "link.badge.plus", accessibilityDescription: "Check Links")!, target: self, action: #selector(checkLinks))
+        checkLinksButton.bezelStyle = .accessoryBarAction
+        checkLinksButton.isBordered = false
+        checkLinksButton.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(checkLinksButton)
+
         let settingsButton = NSButton(image: NSImage(systemSymbolName: "gear", accessibilityDescription: "Settings")!, target: self, action: #selector(openSettings))
         settingsButton.bezelStyle = .accessoryBarAction
         settingsButton.isBordered = false
@@ -119,7 +130,10 @@ class SidebarViewController: NSViewController {
             settingsButton.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -8),
 
             editButton.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            editButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -8)
+            editButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -8),
+
+            checkLinksButton.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            checkLinksButton.trailingAnchor.constraint(equalTo: editButton.leadingAnchor, constant: -8)
         ])
 
         return container
@@ -174,12 +188,133 @@ class SidebarViewController: NSViewController {
     }
 
     @objc private func openSettings() {
-        // Placeholder for R2
+        showExportMenu()
+    }
+
+    @objc private func checkLinks() {
+        guard !isCheckingLinks else {
+            LinkCheckerService.shared.cancelAll()
+            isCheckingLinks = false
+            updateCheckLinksButton()
+            return
+        }
+
+        isCheckingLinks = true
+        updateCheckLinksButton()
+        logger.info("Starting link check")
+
+        let webBookmarks = BookmarkStore.shared.getAll().filter { $0.type == .weblink && $0.url != nil }
+        if webBookmarks.isEmpty {
+            showAlert(title: "No Links to Check", message: "Add some web bookmarks first to check their links.")
+            isCheckingLinks = false
+            updateCheckLinksButton()
+            return
+        }
+
+        LinkCheckerService.shared.onResultsUpdated = { [weak self] results in
+            DispatchQueue.main.async {
+                self?.handleLinkCheckResults(results)
+            }
+        }
+
+        LinkCheckerService.shared.checkAllLinks()
+    }
+
+    private func handleLinkCheckResults(_ results: [LinkCheckResult]) {
+        isCheckingLinks = false
+        updateCheckLinksButton()
+
+        let broken = results.filter { $0.status == .broken || $0.status == .timeout }
+        let valid = results.filter { $0.status == .valid }
+
+        loadData()
+        tableView.reloadData()
+
+        if broken.isEmpty && !valid.isEmpty {
+            showAlert(title: "All Links OK", message: "Checked \(results.count) links. All are valid! 🎉")
+        } else if !broken.isEmpty {
+            showAlert(title: "Broken Links Found", message: "Found \(broken.count) broken or unreachable links out of \(results.count) checked.\n\nBroken links are marked with a red indicator.")
+            logger.warning("Link check found \(broken.count) broken links")
+        }
+    }
+
+    private func updateCheckLinksButton() {
+        let symbolName = isCheckingLinks ? "stop.circle" : "link.badge.plus"
+        checkLinksButton.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: isCheckingLinks ? "Stop Checking" : "Check Links")
+        checkLinksButton.contentTintColor = isCheckingLinks ? .systemOrange : nil
+    }
+
+    private func showExportMenu() {
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Export as HTML…", action: #selector(exportHTML), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Export as CSV…", action: #selector(exportCSV), keyEquivalent: ""))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Check All Links", action: #selector(checkLinks), keyEquivalent: ""))
+
+        let event = NSApp.currentEvent ?? NSEvent()
+        NSMenu.popUpContextMenu(menu, with: event, for: checkLinksButton)
+    }
+
+    @objc private func exportHTML() {
+        let bookmarks = BookmarkStore.shared.getAll()
+        if bookmarks.isEmpty {
+            showAlert(title: "No Bookmarks", message: "Add some bookmarks before exporting.")
+            return
+        }
+        if let url = HTMLBookmarkExporter.shared.saveToFile(bookmarks: bookmarks) {
+            logger.info("Exported HTML to \(url.lastPathComponent)")
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
+    }
+
+    @objc private func exportCSV() {
+        let bookmarks = BookmarkStore.shared.getAll()
+        if bookmarks.isEmpty {
+            showAlert(title: "No Bookmarks", message: "Add some bookmarks before exporting.")
+            return
+        }
+        if let url = CSVBookmarkExporter.shared.saveToFile(bookmarks: bookmarks) {
+            logger.info("Exported CSV to \(url.lastPathComponent)")
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 
     @objc private func addBookmark() {
         showBookmarkSheet(bookmark: nil)
     }
+
+    // MARK: - Keyboard Shortcuts
+
+    override func keyDown(with event: NSEvent) {
+        let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        let hasCmd = modifiers.contains(.command)
+        let hasShift = modifiers.contains(.shift)
+        let key = event.charactersIgnoringModifiers?.lowercased() ?? ""
+
+        if hasCmd && !hasShift && key == "b" {
+            // ⌘B — New bookmark
+            addBookmark()
+        } else if hasCmd && !hasShift && key == "e" {
+            // ⌘E — Export menu
+            showExportMenu()
+        } else if hasCmd && hasShift && key == "b" {
+            // ⌘⇧B — Check links
+            checkLinks()
+        } else {
+            super.keyDown(with: event)
+        }
+    }
+
+    override var acceptsFirstResponder: Bool { true }
 
     private func showBookmarkSheet(bookmark: Bookmark?) {
         let sheet = AddBookmarkSheet(bookmark: bookmark)

@@ -14,6 +14,91 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         setupSidebarPanel()
         setupPopover()
+        setupMainMenu()
+    }
+
+    // MARK: - Main Menu
+
+    private func setupMainMenu() {
+        let mainMenu = NSMenu()
+
+        // App menu
+        let appMenuItem = NSMenuItem()
+        let appMenu = NSMenu()
+        appMenu.addItem(NSMenuItem(title: "About Plank", action: #selector(showAbout), keyEquivalent: ""))
+        appMenu.addItem(NSMenuItem.separator())
+        appMenu.addItem(NSMenuItem(title: "Check All Links…", action: #selector(checkAllLinksFromMenu), keyEquivalent: "k"))
+        appMenu.addItem(NSMenuItem.separator())
+        appMenu.addItem(NSMenuItem(title: "Quit Plank", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        appMenuItem.submenu = appMenu
+        mainMenu.addItem(appMenuItem)
+
+        // File menu
+        let fileMenuItem = NSMenuItem()
+        let fileMenu = NSMenu(title: "File")
+        fileMenu.addItem(NSMenuItem(title: "New Bookmark…", action: #selector(newBookmarkFromMenu), keyEquivalent: "b"))
+        fileMenu.addItem(NSMenuItem.separator())
+        fileMenu.addItem(NSMenuItem(title: "Export as HTML…", action: #selector(exportHTMLFromMenu), keyEquivalent: "e"))
+        fileMenu.addItem(NSMenuItem(title: "Export as CSV…", action: #selector(exportCSVFromMenu), keyEquivalent: ""))
+        fileMenu.addItem(NSMenuItem.separator())
+        fileMenu.addItem(NSMenuItem(title: "Close Sidebar", action: #selector(closeSidebarFromMenu), keyEquivalent: "w"))
+        fileMenuItem.submenu = fileMenu
+        mainMenu.addItem(fileMenuItem)
+
+        // View menu
+        let viewMenuItem = NSMenuItem()
+        let viewMenu = NSMenu(title: "View")
+        viewMenu.addItem(NSMenuItem(title: "Toggle Sidebar", action: #selector(toggleSidebarFromMenu), keyEquivalent: "s"))
+        viewMenuItem.submenu = viewMenu
+        mainMenu.addItem(viewMenuItem)
+
+        NSApp.mainMenu = mainMenu
+    }
+
+    @objc private func showAbout() {
+        let alert = NSAlert()
+        alert.messageText = "Plank"
+        alert.informativeText = "A native macOS bookmark manager.\nVersion 1.0"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+
+    @objc private func newBookmarkFromMenu() {
+        toggleSidebar()
+        // Brief delay to let the sidebar appear
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.sidebarViewController.performSelector(onMainThread: NSSelectorFromString("addBookmark"), with: nil, waitUntilDone: false)
+        }
+    }
+
+    @objc private func exportHTMLFromMenu() {
+        let bookmarks = BookmarkStore.shared.getAll()
+        if let url = HTMLBookmarkExporter.shared.saveToFile(bookmarks: bookmarks) {
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
+    }
+
+    @objc private func exportCSVFromMenu() {
+        let bookmarks = BookmarkStore.shared.getAll()
+        if let url = CSVBookmarkExporter.shared.saveToFile(bookmarks: bookmarks) {
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
+    }
+
+    @objc private func checkAllLinksFromMenu() {
+        toggleSidebar()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.sidebarViewController.performSelector(onMainThread: NSSelectorFromString("checkLinks"), with: nil, waitUntilDone: false)
+        }
+    }
+
+    @objc private func closeSidebarFromMenu() {
+        sidebarPanel.orderOut(nil)
+    }
+
+    @objc private func toggleSidebarFromMenu() {
+        toggleSidebar()
     }
 
     // MARK: - Status Item
@@ -137,6 +222,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.sidebarPanel.orderOut(nil)
         }
         sidebarPanel.contentViewController = sidebarViewController
+        sidebarPanel.initialFirstResponder = sidebarViewController.view
     }
 
     private func toggleSidebar() {
