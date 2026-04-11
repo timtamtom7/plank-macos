@@ -99,32 +99,32 @@ class SidebarViewController: NSViewController {
         editButton.bezelStyle = .accessoryBarAction
         editButton.isBordered = false
         editButton.translatesAutoresizingMaskIntoConstraints = false
-        editButton.accessibilityLabel = "Edit bookmarks"
-        editButton.accessibilityRole = .button
+        editButton.setAccessibilityLabel("Edit bookmarks")
+        editButton.setAccessibilityRole(.button)
         container.addSubview(editButton)
 
         checkLinksButton = NSButton(image: NSImage(systemSymbolName: "link.badge.plus", accessibilityDescription: "Check Links")!, target: self, action: #selector(checkLinks))
         checkLinksButton.bezelStyle = .accessoryBarAction
         checkLinksButton.isBordered = false
         checkLinksButton.translatesAutoresizingMaskIntoConstraints = false
-        checkLinksButton.accessibilityLabel = "Check all links"
-        checkLinksButton.accessibilityRole = .button
+        checkLinksButton.setAccessibilityLabel("Check all links")
+        checkLinksButton.setAccessibilityRole(.button)
         container.addSubview(checkLinksButton)
 
         let settingsButton = NSButton(image: NSImage(systemSymbolName: "gear", accessibilityDescription: "Settings")!, target: self, action: #selector(openSettings))
         settingsButton.bezelStyle = .accessoryBarAction
         settingsButton.isBordered = false
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
-        settingsButton.accessibilityLabel = "Settings"
-        settingsButton.accessibilityRole = .button
+        settingsButton.setAccessibilityLabel("Settings")
+        settingsButton.setAccessibilityRole(.button)
         container.addSubview(settingsButton)
 
         let closeButton = NSButton(image: NSImage(systemSymbolName: "xmark", accessibilityDescription: "Close")!, target: self, action: #selector(closeSidebar))
         closeButton.bezelStyle = .accessoryBarAction
         closeButton.isBordered = false
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.accessibilityLabel = "Close sidebar"
-        closeButton.accessibilityRole = .button
+        closeButton.setAccessibilityLabel("Close sidebar")
+        closeButton.setAccessibilityRole(.button)
         container.addSubview(closeButton)
 
         NSLayoutConstraint.activate([
@@ -160,8 +160,8 @@ class SidebarViewController: NSViewController {
         addButton.bezelStyle = .accessoryBarAction
         addButton.isBordered = false
         addButton.translatesAutoresizingMaskIntoConstraints = false
-        addButton.accessibilityLabel = "Add bookmark"
-        addButton.accessibilityRole = .button
+        addButton.setAccessibilityLabel("Add bookmark")
+        addButton.setAccessibilityRole(.button)
         container.addSubview(addButton)
 
         NSLayoutConstraint.activate([
@@ -201,7 +201,7 @@ class SidebarViewController: NSViewController {
         showExportMenu()
     }
 
-    @objc private func checkLinks() {
+    @objc func checkLinks() {
         guard !isCheckingLinks else {
             LinkCheckerService.shared.cancelAll()
             isCheckingLinks = false
@@ -298,7 +298,7 @@ class SidebarViewController: NSViewController {
         alert.runModal()
     }
 
-    @objc private func addBookmark() {
+    @objc func addBookmark() {
         showBookmarkSheet(bookmark: nil)
     }
 

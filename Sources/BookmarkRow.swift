@@ -97,8 +97,8 @@ class BookmarkRowView: NSView {
         editButton.isBordered = false
         editButton.translatesAutoresizingMaskIntoConstraints = false
         editButton.isHidden = !isEditMode
-        editButton.accessibilityLabel = "Edit bookmark"
-        editButton.accessibilityRole = .button
+        editButton.setAccessibilityLabel("Edit bookmark")
+        editButton.setAccessibilityRole(.button)
         addSubview(editButton)
 
         // Delete button
@@ -108,8 +108,8 @@ class BookmarkRowView: NSView {
         deleteButton.contentTintColor = .systemRed
         deleteButton.translatesAutoresizingMaskIntoConstraints = false
         deleteButton.isHidden = !isEditMode
-        deleteButton.accessibilityLabel = "Delete bookmark"
-        deleteButton.accessibilityRole = .button
+        deleteButton.setAccessibilityLabel("Delete bookmark")
+        deleteButton.setAccessibilityRole(.button)
         addSubview(deleteButton)
 
         // Drag handle

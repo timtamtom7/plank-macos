@@ -15,6 +15,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupSidebarPanel()
         setupPopover()
         setupMainMenu()
+        setupShortcutObservers()
+    }
+
+    private func setupShortcutObservers() {
+        NotificationCenter.default.addObserver(
+            forName: .openSidebarFromShortcut,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.toggleSidebar()
+        }
     }
 
     // MARK: - Main Menu
@@ -108,8 +119,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "rectangle.split.1x2", accessibilityDescription: "Plank")
-            button.accessibilityLabel = "Plank menu bar"
-            button.accessibilityRole = .button
+            button.setAccessibilityLabel("Plank menu bar")
+            button.setAccessibilityRole(.button)
             button.action = #selector(statusItemClicked(_:))
             button.target = self
         }

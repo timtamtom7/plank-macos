@@ -126,7 +126,7 @@ class BookmarkStore {
                 t.column(position)
                 t.column(type)
                 t.column(isPinned, defaultValue: false)
-                t.column(linkStatusCol, defaultValue: LinkStatus.unknown.rawValue)
+                t.column(linkStatusCol)
             })
             // Migrate existing DB if link_status column doesn't exist yet
             migrateLinkStatus()
@@ -140,8 +140,10 @@ class BookmarkStore {
         do {
             let exists = try db?.scalar("SELECT 1 FROM pragma_table_info('bookmarks') WHERE name='link_status'") as? Int
             if exists == nil {
-                try db?.run(bookmarks.addColumn(linkStatusCol))
-                try db?.run(bookmarks.update(linkStatusCol <- LinkStatus.unknown.rawValue))
+                // Use raw SQL to add column with DEFAULT constraint (avoids Expression<String?> type issue)
+                try db?.execute("ALTER TABLE bookmarks ADD COLUMN link_status TEXT DEFAULT '\(LinkStatus.unknown.rawValue)'")
+                // Update existing rows that may have NULL
+                try db?.execute("UPDATE bookmarks SET link_status = '\(LinkStatus.unknown.rawValue)' WHERE link_status IS NULL")
             }
         } catch {
             print("BookmarkStore: Migration failed: \(error)")

@@ -1,4 +1,5 @@
 import AppIntents
+import AppKit
 import Foundation
 
 // MARK: - App Shortcuts Provider
@@ -28,6 +29,12 @@ struct PlankShortcuts: AppShortcutsProvider {
     }
 }
 
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let openSidebarFromShortcut = Notification.Name("PlankOpenSidebarFromShortcut")
+}
+
 // MARK: - Get Bookmark Count Intent
 
 @available(macOS 13.0, *)
@@ -51,12 +58,10 @@ struct OpenSidebarIntent: AppIntent {
     static var title: LocalizedStringResource = "Open Plank Sidebar"
     static var description = IntentDescription("Opens the Plank sidebar")
 
-    static var openAppWhenRun: Bool = false
+    static var openAppWhenRun: Bool = true
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        await MainActor.run {
-            NSApp.sendAction(#selector(AppDelegate.toggleSidebarFromMenu), to: nil, from: nil)
-        }
+        NotificationCenter.default.post(name: .openSidebarFromShortcut, object: nil)
         return .result(dialog: "Opening Plank sidebar")
     }
 }
