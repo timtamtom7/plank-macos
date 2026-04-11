@@ -58,7 +58,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showAbout() {
         let alert = NSAlert()
         alert.messageText = "Plank"
-        alert.informativeText = "A native macOS bookmark manager.\nVersion 1.0"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        alert.informativeText = "A native macOS bookmark manager.\nVersion \(version)"
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         alert.runModal()
@@ -68,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         toggleSidebar()
         // Brief delay to let the sidebar appear
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            self?.sidebarViewController.performSelector(onMainThread: NSSelectorFromString("addBookmark"), with: nil, waitUntilDone: false)
+            self?.sidebarViewController.addBookmark()
         }
     }
 
@@ -89,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func checkAllLinksFromMenu() {
         toggleSidebar()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            self?.sidebarViewController.performSelector(onMainThread: NSSelectorFromString("checkLinks"), with: nil, waitUntilDone: false)
+            self?.sidebarViewController.checkLinks()
         }
     }
 
@@ -107,6 +108,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "rectangle.split.1x2", accessibilityDescription: "Plank")
+            button.accessibilityLabel = "Plank menu bar"
+            button.accessibilityRole = .button
             button.action = #selector(statusItemClicked(_:))
             button.target = self
         }

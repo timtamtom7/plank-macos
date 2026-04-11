@@ -85,6 +85,7 @@ class BookmarkStore {
     static let shared = BookmarkStore()
 
     private var db: Connection?
+    private let dbQueue = DispatchQueue(label: "com.plank.db", qos: .userInitiated)
 
     // Table definition
     private let bookmarks = Table("bookmarks")
@@ -135,100 +136,114 @@ class BookmarkStore {
     }
 
     private func migrateLinkStatus() {
-        // Check if the column exists, if not add it (for existing databases)
+        // Check if the column exists using pragma_table_info, if not add it (for existing databases)
         do {
-            try db?.run(bookmarks.addColumn(linkStatusCol, defaultValue: LinkStatus.unknown.rawValue))
+            let exists = try db?.scalar("SELECT 1 FROM pragma_table_info('bookmarks') WHERE name='link_status'") as? Int
+            if exists == nil {
+                try db?.run(bookmarks.addColumn(linkStatusCol))
+                try db?.run(bookmarks.update(linkStatusCol <- LinkStatus.unknown.rawValue))
+            }
         } catch {
-            // Column already exists or migration not needed — ignore
+            print("BookmarkStore: Migration failed: \(error)")
         }
     }
 
     // MARK: - CRUD
 
     func getAll() -> [Bookmark] {
-        var result: [Bookmark] = []
-        do {
-            guard let db = db else { return [] }
-            for row in try db.prepare(bookmarks.order(position.asc)) {
-                let bookmark = Bookmark(
-                    id: row[id],
-                    name: row[name],
-                    url: row[url],
-                    path: row[path],
-                    icon: row[icon],
-                    position: row[position],
-                    type: BookmarkType(rawValue: row[type]) ?? .weblink,
-                    isPinned: row[isPinned],
-                    linkStatus: LinkStatus(rawValue: row[linkStatusCol]) ?? .unknown
-                )
-                result.append(bookmark)
+        return dbQueue.sync {
+            var result: [Bookmark] = []
+            do {
+                guard let db = db else { return [] }
+                for row in try db.prepare(bookmarks.order(position.asc)) {
+                    let bookmark = Bookmark(
+                        id: row[id],
+                        name: row[name],
+                        url: row[url],
+                        path: row[path],
+                        icon: row[icon],
+                        position: row[position],
+                        type: BookmarkType(rawValue: row[type]) ?? .weblink,
+                        isPinned: row[isPinned],
+                        linkStatus: LinkStatus(rawValue: row[linkStatusCol]) ?? .unknown
+                    )
+                    result.append(bookmark)
+                }
+            } catch {
+                print("BookmarkStore: Failed to get all: \(error)")
             }
-        } catch {
-            print("BookmarkStore: Failed to get all: \(error)")
+            return result
         }
-        return result
     }
 
     func insert(_ bookmark: Bookmark) -> Int64? {
-        do {
-            guard let db = db else { return nil }
-            let insert = bookmarks.insert(
-                name <- bookmark.name,
-                url <- bookmark.url,
-                path <- bookmark.path,
-                icon <- bookmark.icon,
-                position <- bookmark.position,
-                type <- bookmark.type.rawValue,
-                isPinned <- bookmark.isPinned,
-                linkStatusCol <- bookmark.linkStatus.rawValue
-            )
-            return try db.run(insert)
-        } catch {
-            print("BookmarkStore: Failed to insert: \(error)")
-            return nil
+        return dbQueue.sync {
+            do {
+                guard let db = db else { return nil }
+                let insert = bookmarks.insert(
+                    name <- bookmark.name,
+                    url <- bookmark.url,
+                    path <- bookmark.path,
+                    icon <- bookmark.icon,
+                    position <- bookmark.position,
+                    type <- bookmark.type.rawValue,
+                    isPinned <- bookmark.isPinned,
+                    linkStatusCol <- bookmark.linkStatus.rawValue
+                )
+                return try db.run(insert)
+            } catch {
+                print("BookmarkStore: Failed to insert: \(error)")
+                return nil
+            }
         }
     }
 
     func update(_ bookmark: Bookmark) {
         guard let bookmarkId = bookmark.id else { return }
-        do {
-            guard let db = db else { return }
-            let row = bookmarks.filter(id == bookmarkId)
-            try db.run(row.update(
-                name <- bookmark.name,
-                url <- bookmark.url,
-                path <- bookmark.path,
-                icon <- bookmark.icon,
-                position <- bookmark.position,
-                type <- bookmark.type.rawValue,
-                isPinned <- bookmark.isPinned,
-                linkStatusCol <- bookmark.linkStatus.rawValue
-            ))
-        } catch {
-            print("BookmarkStore: Failed to update: \(error)")
+        dbQueue.sync {
+            do {
+                guard let db = db else { return }
+                let row = bookmarks.filter(id == bookmarkId)
+                try db.run(row.update(
+                    name <- bookmark.name,
+                    url <- bookmark.url,
+                    path <- bookmark.path,
+                    icon <- bookmark.icon,
+                    position <- bookmark.position,
+                    type <- bookmark.type.rawValue,
+                    isPinned <- bookmark.isPinned,
+                    linkStatusCol <- bookmark.linkStatus.rawValue
+                ))
+            } catch {
+                print("BookmarkStore: Failed to update: \(error)")
+            }
         }
     }
 
     func delete(_ bookmarkId: Int64) {
-        do {
-            guard let db = db else { return }
-            let row = bookmarks.filter(id == bookmarkId)
-            try db.run(row.delete())
-        } catch {
-            print("BookmarkStore: Failed to delete: \(error)")
+        dbQueue.sync {
+            do {
+                guard let db = db else { return }
+                let row = bookmarks.filter(id == bookmarkId)
+                try db.run(row.delete())
+            } catch {
+                print("BookmarkStore: Failed to delete: \(error)")
+            }
         }
     }
 
     func reorder(_ reordered: [Bookmark]) {
-        guard let db = db else { return }
-        for (index, var bookmark) in reordered.enumerated() {
-            bookmark.position = index
-            if let bid = bookmark.id {
-                do {
-                    let row = bookmarks.filter(id == bid)
-                    try db.run(row.update(position <- index))
-                } catch {
-                    print("BookmarkStore: Failed to reorder: \(error)")
+        dbQueue.sync {
+            guard let db = db else { return }
+            for (index, var bookmark) in reordered.enumerated() {
+                bookmark.position = index
+                if let bid = bookmark.id {
+                    do {
+                        let row = bookmarks.filter(id == bid)
+                        try db.run(row.update(position <- index))
+                    } catch {
+                        print("BookmarkStore: Failed to reorder: \(error)")
+                    }
                 }
             }
         }
@@ -244,19 +259,29 @@ class BookmarkStore {
 
     /// Update only the link status of a bookmark
     func updateLinkStatus(_ bookmarkId: Int64, status: LinkStatus) {
-        do {
-            guard let db = db else { return }
-            let row = bookmarks.filter(id == bookmarkId)
-            try db.run(row.update(linkStatusCol <- status.rawValue))
-        } catch {
-            print("BookmarkStore: Failed to update link status: \(error)")
+        dbQueue.sync {
+            do {
+                guard let db = db else { return }
+                let row = bookmarks.filter(id == bookmarkId)
+                try db.run(row.update(linkStatusCol <- status.rawValue))
+            } catch {
+                print("BookmarkStore: Failed to update link status: \(error)")
+            }
         }
     }
 
     /// Batch update link statuses
     func updateLinkStatuses(_ updates: [(Int64, LinkStatus)]) {
-        for (bookmarkId, status) in updates {
-            updateLinkStatus(bookmarkId, status: status)
+        dbQueue.sync {
+            for (bookmarkId, status) in updates {
+                do {
+                    guard let db = db else { return }
+                    let row = bookmarks.filter(id == bookmarkId)
+                    try db.run(row.update(linkStatusCol <- status.rawValue))
+                } catch {
+                    print("BookmarkStore: Failed to batch update link status: \(error)")
+                }
+            }
         }
     }
 

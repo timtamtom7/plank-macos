@@ -3,6 +3,7 @@ import Foundation
 
 // MARK: - App Shortcuts Provider
 
+@available(macOS 13.0, *)
 struct PlankShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
@@ -29,6 +30,7 @@ struct PlankShortcuts: AppShortcutsProvider {
 
 // MARK: - Get Bookmark Count Intent
 
+@available(macOS 13.0, *)
 struct GetBookmarkCountIntent: AppIntent {
     static var title: LocalizedStringResource = "Get Bookmark Count"
     static var description = IntentDescription("Returns the total number of bookmarks in Plank")
@@ -37,19 +39,24 @@ struct GetBookmarkCountIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ReturnsValue<Int> {
         let count = await PlankState.shared.bookmarks.count
-        return .result(value: count, dialog: "Plank has \(count) bookmarks")
+        let plural = count == 1 ? "bookmark" : "bookmarks"
+        return .result(value: count, dialog: "Plank has \(count) \(plural)")
     }
 }
 
 // MARK: - Open Sidebar Intent
 
+@available(macOS 13.0, *)
 struct OpenSidebarIntent: AppIntent {
     static var title: LocalizedStringResource = "Open Plank Sidebar"
     static var description = IntentDescription("Opens the Plank sidebar")
 
-    static var openAppWhenRun: Bool = true
+    static var openAppWhenRun: Bool = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        await MainActor.run {
+            NSApp.sendAction(#selector(AppDelegate.toggleSidebarFromMenu), to: nil, from: nil)
+        }
         return .result(dialog: "Opening Plank sidebar")
     }
 }

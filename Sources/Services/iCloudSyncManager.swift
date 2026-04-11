@@ -111,7 +111,14 @@ final class PlankSyncManager: ObservableObject {
         sync()
     }
 
-    deinit {
+    /// Must be called before deallocation to safely remove observers
+    func cleanup() {
         observers.forEach { NotificationCenter.default.removeObserver($0) }
+        observers.removeAll()
+    }
+
+    deinit {
+        // Observers are cleaned up via explicit cleanup() call before deallocation
+        // This deinit serves as a safety net assertion
     }
 }

@@ -5,22 +5,73 @@ public final class PlankPrivacyService {
     public static let shared = PlankPrivacyService()
     private let keychainService = "com.plank.macos.privacy"
     private init() {}
+
     public func getOrCreateKey() throws -> SymmetricKey {
-        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: keychainService, kSecAttrAccount as String: "plank-key", kSecReturnData as String: true]
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: "plank-key",
+            kSecReturnData as String: true
+        ]
         var result: AnyObject?
-        if SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess, let data = result as? Data { return SymmetricKey(data: data) }
+        if SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess, let data = result as? Data {
+            return SymmetricKey(data: data)
+        }
         let key = SymmetricKey(size: .bits256)
         let keyData = key.withUnsafeBytes { Data($0) }
-        let storeQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: keychainService, kSecAttrAccount as String: "plank-key", kSecValueData as String: keyData, kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly]
-        SecItemDelete(storeQuery as CFDictionary); SecItemAdd(storeQuery as CFDictionary, nil)
+        let storeQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: "plank-key",
+            kSecValueData as String: keyData,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        ]
+        SecItemDelete(storeQuery as CFDictionary)
+        SecItemAdd(storeQuery as CFDictionary, nil)
         return key
     }
+
     public func encrypt(_ data: Data) throws -> Data {
         let key = try getOrCreateKey()
         let box = try AES.GCM.seal(data, using: key)
-        guard let combined = box.combined else { throw NSError(domain: "PlankPrivacy", code: -1) }
+        guard let combined = box.combined else {
+            throw NSError(domain: "PlankPrivacy", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to combine sealed data"])
+        }
         return combined
     }
-    public func wipeAllData() { if let bundleId = Bundle.main.bundleIdentifier { UserDefaults.standard.removePersistentDomain(forName: bundleId) } }
-    public static var privacyManifest: [String: Any] { ["NSPrivacyTracking": false, "NSPrivacyTrackingDomains": [], "NSPrivacyCollectedDataTypes": [], "NSPrivacyAccessedDataTypes": [["NSPrivacyAccessedDataType": "NSPrivacyAccessedDataTypeUserDefaults", "NSPrivacyAccessedDataTypeReasons": ["CA92.1"]]]] }
+
+    public func wipeAllData() {
+        // Wipe UserDefaults
+        if let bundleId = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: bundleId)
+        }
+
+        // Wipe SQLite database
+        let fileManager = FileManager.default
+        if let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            let dbPath = appSupport.appendingPathComponent("Plank/plank.db")
+            try? fileManager.removeItem(at: dbPath)
+        }
+
+        // Wipe keychain entries
+        let keychainQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService
+        ]
+        SecItemDelete(keychainQuery as CFDictionary)
+    }
+
+    public static var privacyManifest: [String: Any] {
+        [
+            "NSPrivacyTracking": false,
+            "NSPrivacyTrackingDomains": [],
+            "NSPrivacyCollectedDataTypes": [],
+            "NSPrivacyAccessedDataTypes": [
+                [
+                    "NSPrivacyAccessedDataType": "NSPrivacyAccessedDataTypeUserDefaults",
+                    "NSPrivacyAccessedDataTypeReasons": ["CA92.1"]
+                ]
+            ]
+        ]
+    }
 }

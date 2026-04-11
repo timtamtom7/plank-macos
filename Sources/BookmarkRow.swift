@@ -18,6 +18,8 @@ class BookmarkRowView: NSView {
     private var dragHandle: NSImageView!
     private var trackingArea: NSTrackingArea?
 
+    private static var iconCache: [String: NSImage] = [:]
+
     init(bookmark: Bookmark, isEditMode: Bool) {
         self.bookmark = bookmark
         self.isEditMode = isEditMode
@@ -40,19 +42,25 @@ class BookmarkRowView: NSView {
         let symbolName: String
         switch bookmark.type {
         case .weblink:
-            symbolName = bookmark.icon.isEmpty ? "globe" : bookmark.icon
+            symbolName = bookmark.icon.isEmpty ? Theme.Symbol.globe : bookmark.icon
         case .folder:
-            symbolName = bookmark.icon.isEmpty ? "folder.fill" : bookmark.icon
+            symbolName = bookmark.icon.isEmpty ? Theme.Symbol.folderOpen : bookmark.icon
         case .app:
-            symbolName = bookmark.icon.isEmpty ? "app.fill" : bookmark.icon
+            symbolName = bookmark.icon.isEmpty ? Theme.Symbol.appDefault : bookmark.icon
         }
         iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: bookmark.name)
         iconView.contentTintColor = tintColorForBookmark()
         addSubview(iconView)
 
-        // For apps, try to load the actual icon
+        // For apps, load icon from cache or disk
         if bookmark.type == .app, let path = bookmark.path {
-            iconView.image = NSWorkspace.shared.icon(forFile: path)
+            if let cached = BookmarkRowView.iconCache[path] {
+                iconView.image = cached
+            } else {
+                let icon = NSWorkspace.shared.icon(forFile: path)
+                BookmarkRowView.iconCache[path] = icon
+                iconView.image = icon
+            }
         }
 
         // Name
@@ -84,25 +92,29 @@ class BookmarkRowView: NSView {
         addSubview(statusIconView)
 
         // Edit button
-        editButton = NSButton(image: NSImage(systemSymbolName: "pencil", accessibilityDescription: "Edit")!, target: self, action: #selector(editTapped))
+        editButton = NSButton(image: NSImage(systemSymbolName: Theme.Symbol.edit, accessibilityDescription: "Edit")!, target: self, action: #selector(editTapped))
         editButton.bezelStyle = .accessoryBarAction
         editButton.isBordered = false
         editButton.translatesAutoresizingMaskIntoConstraints = false
         editButton.isHidden = !isEditMode
+        editButton.accessibilityLabel = "Edit bookmark"
+        editButton.accessibilityRole = .button
         addSubview(editButton)
 
         // Delete button
-        deleteButton = NSButton(image: NSImage(systemSymbolName: "trash", accessibilityDescription: "Delete")!, target: self, action: #selector(deleteTapped))
+        deleteButton = NSButton(image: NSImage(systemSymbolName: Theme.Symbol.delete, accessibilityDescription: "Delete")!, target: self, action: #selector(deleteTapped))
         deleteButton.bezelStyle = .accessoryBarAction
         deleteButton.isBordered = false
         deleteButton.contentTintColor = .systemRed
         deleteButton.translatesAutoresizingMaskIntoConstraints = false
         deleteButton.isHidden = !isEditMode
+        deleteButton.accessibilityLabel = "Delete bookmark"
+        deleteButton.accessibilityRole = .button
         addSubview(deleteButton)
 
         // Drag handle
         dragHandle = NSImageView()
-        dragHandle.image = NSImage(systemSymbolName: "line.3.horizontal", accessibilityDescription: "Drag")
+        dragHandle.image = NSImage(systemSymbolName: Theme.Symbol.dragHandle, accessibilityDescription: "Drag")
         dragHandle.contentTintColor = Theme.tertiaryTextColor
         dragHandle.translatesAutoresizingMaskIntoConstraints = false
         dragHandle.isHidden = !isEditMode
@@ -112,15 +124,19 @@ class BookmarkRowView: NSView {
     }
 
     private func setupConstraints() {
+        let iconSize = Theme.iconSize
+        let iconTextSpacing = Theme.iconTextSpacing
+        let smallButtonSize = Theme.smallButtonSize
+
         NSLayoutConstraint.activate([
             // Icon
             iconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Theme.padding),
             iconView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 24),
-            iconView.heightAnchor.constraint(equalToConstant: 24),
+            iconView.widthAnchor.constraint(equalToConstant: iconSize),
+            iconView.heightAnchor.constraint(equalToConstant: iconSize),
 
             // Name
-            nameLabel.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 10),
+            nameLabel.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: iconTextSpacing),
             nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: statusIconView.leadingAnchor, constant: -4),
 
@@ -138,14 +154,14 @@ class BookmarkRowView: NSView {
             // Edit button
             editButton.trailingAnchor.constraint(equalTo: deleteButton.leadingAnchor, constant: -4),
             editButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            editButton.widthAnchor.constraint(equalToConstant: 20),
-            editButton.heightAnchor.constraint(equalToConstant: 20),
+            editButton.widthAnchor.constraint(equalToConstant: smallButtonSize),
+            editButton.heightAnchor.constraint(equalToConstant: smallButtonSize),
 
             // Delete button
             deleteButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Theme.padding),
             deleteButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            deleteButton.widthAnchor.constraint(equalToConstant: 20),
-            deleteButton.heightAnchor.constraint(equalToConstant: 20),
+            deleteButton.widthAnchor.constraint(equalToConstant: smallButtonSize),
+            deleteButton.heightAnchor.constraint(equalToConstant: smallButtonSize),
 
             // Drag handle
             dragHandle.trailingAnchor.constraint(equalTo: isEditMode ? editButton.leadingAnchor : trailingAnchor, constant: isEditMode ? -8 : 0),
@@ -190,10 +206,10 @@ class BookmarkRowView: NSView {
 
     private func linkStatusColor() -> NSColor {
         switch bookmark.linkStatus {
-        case .valid: return NSColor(red: 0.06, green: 0.73, blue: 0.51, alpha: 1.0) // #10B981 Success
-        case .broken: return NSColor(red: 0.94, green: 0.27, blue: 0.27, alpha: 1.0) // #EF4444 Destructive
-        case .redirected: return NSColor(red: 0.96, green: 0.62, blue: 0.04, alpha: 1.0) // #F59E0B Warning
-        case .timeout: return NSColor(red: 0.96, green: 0.62, blue: 0.04, alpha: 1.0) // #F59E0B Warning
+        case .valid: return Theme.linkValidColor
+        case .broken: return Theme.linkBrokenColor
+        case .redirected: return Theme.linkWarningColor
+        case .timeout: return Theme.linkWarningColor
         case .checking: return .secondaryLabelColor
         case .unknown: return .clear
         }

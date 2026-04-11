@@ -62,10 +62,12 @@ final class LinkCheckerService: ObservableObject {
         Task {
             for bookmark in bookmarks {
                 guard let urlString = bookmark.url, let url = URL(string: urlString) else {
-                    saveResult(LinkCheckResult(bookmarkId: bookmark.id ?? 0, status: .broken))
+                    let result = LinkCheckResult(bookmarkId: bookmark.id ?? 0, status: .broken)
+                    await MainActor.run { self.saveResult(result) }
                     continue
                 }
-                performCheckSynchronous(bookmarkId: bookmark.id ?? 0, url: url)
+                let result = await performCheckAsync(bookmarkId: bookmark.id ?? 0, url: url)
+                await MainActor.run { self.saveResult(result) }
 
                 // Small delay to avoid hammering servers
                 try? await Task.sleep(nanoseconds: 200_000_000)
@@ -107,76 +109,44 @@ final class LinkCheckerService: ObservableObject {
     private func performCheck(bookmarkId: Int64, url: URL) {
         let task = Task { [weak self] in
             guard let self = self else { return }
-            await self.performCheckSynchronous(bookmarkId: bookmarkId, url: url)
+            let result = await self.performCheckAsync(bookmarkId: bookmarkId, url: url)
+            await MainActor.run { self.saveResult(result) }
         }
         checkTasks[bookmarkId] = task
     }
 
-    private func performCheckSynchronous(bookmarkId: Int64, url: URL) {
+    private func performCheckAsync(bookmarkId: Int64, url: URL) async -> LinkCheckResult {
         var request = URLRequest(url: url)
         request.httpMethod = "HEAD"
         request.timeoutInterval = 10
 
         let startTime = Date()
 
-        let semaphore = DispatchSemaphore(value: 0)
-        var resultStatus: LinkStatus = .unknown
-        var resultCode: Int?
-        var responseTime: Int?
-
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 10
-        config.timeoutIntervalForResource = 10
-        let session = URLSession(configuration: config)
-
-        let urlTask = session.dataTask(with: request) { _, response, error in
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
             let elapsed = Int(Date().timeIntervalSince(startTime) * 1000)
-            responseTime = elapsed
 
-            if let error = error {
-                let nsError = error as NSError
-                if nsError.code == NSURLErrorTimedOut {
-                    resultStatus = .timeout
-                } else {
-                    resultStatus = .broken
-                }
-            } else if let httpResponse = response as? HTTPURLResponse {
-                resultCode = httpResponse.statusCode
-                switch httpResponse.statusCode {
+            if let httpResponse = response as? HTTPURLResponse {
+                let statusCode = httpResponse.statusCode
+                let status: LinkStatus
+                switch statusCode {
                 case 200..<400:
-                    resultStatus = .valid
+                    status = .valid
                 case 400..<500:
-                    resultStatus = .broken
+                    status = .broken
                 case 500..<600:
-                    resultStatus = .broken
+                    status = .broken
                 default:
-                    if httpResponse.statusCode >= 300 {
-                        resultStatus = .redirected
-                    } else {
-                        resultStatus = .valid
-                    }
+                    status = statusCode >= 300 ? .redirected : .valid
                 }
+                return LinkCheckResult(bookmarkId: bookmarkId, status: status, statusCode: statusCode, responseTimeMs: elapsed)
             } else {
-                resultStatus = .unknown
+                return LinkCheckResult(bookmarkId: bookmarkId, status: .unknown, responseTimeMs: elapsed)
             }
-
-            semaphore.signal()
-        }
-
-        urlTask.resume()
-
-        // Wait with timeout
-        _ = semaphore.wait(timeout: .now() + 10)
-
-        let result = LinkCheckResult(
-            bookmarkId: bookmarkId,
-            status: resultStatus,
-            statusCode: resultCode,
-            responseTimeMs: responseTime
-        )
-
-        DispatchQueue.main.async { [weak self] in
-            self?.saveResult(result)
+        } catch let error as NSError {
+            let elapsed = Int(Date().timeIntervalSince(startTime) * 1000)
+            let status: LinkStatus = (error.code == NSURLErrorTimedOut) ? .timeout : .broken
+            return LinkCheckResult(bookmarkId: bookmarkId, status: status, responseTimeMs: elapsed)
         }
     }
 

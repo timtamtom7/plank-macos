@@ -36,11 +36,20 @@ enum Theme {
         return NSColor.selectedContentBackgroundColor.withAlphaComponent(0.1)
     }
 
+    // MARK: - Link Status Colors
+
+    static var linkValidColor: NSColor { NSColor.systemGreen }
+    static var linkBrokenColor: NSColor { NSColor.systemRed }
+    static var linkWarningColor: NSColor { NSColor.systemOrange }
+
     // MARK: - Spacing
 
     static let padding: CGFloat = 12
     static let smallPadding: CGFloat = 6
     static let largePadding: CGFloat = 20
+    static let iconSize: CGFloat = 24
+    static let iconTextSpacing: CGFloat = 10
+    static let smallButtonSize: CGFloat = 20
 
     // MARK: - Corner Radius
 
@@ -59,6 +68,10 @@ enum Theme {
 
     static var captionFont: NSFont {
         return NSFont.systemFont(ofSize: 11, weight: .regular)
+    }
+
+    static var sectionHeaderFont: NSFont {
+        return NSFont.systemFont(ofSize: 11, weight: .semibold)
     }
 
     // MARK: - SF Symbols
